@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>teez fares</title>
+    <style>
+        /* General Body Styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            /* The perspective property is crucial for the 3D transforms */
+            perspective: 1200px;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            animation: colorCycle 20s ease-in-out infinite;
+            filter: blur(80px); /* Increased blur for a softer look */
+            z-index: -2;
+        }
+        
+        /* Grain Effect - UPDATED */
+        body::after {
+            content: '';
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            top: 0;
+            left: 0;
+            /* This SVG filter creates a more visible grain texture */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.15; /* Increased opacity slightly for better visibility */
+            z-index: -1;
+        }
+
+        @keyframes colorCycle {
+            0% { background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 100%); }
+            25% { background: linear-gradient(45deg, #a1c4fd 0%, #c2e9fb 100%); }
+            50% { background: linear-gradient(45deg, #84fab0 0%, #8fd3f4 100%); }
+            75% { background: linear-gradient(45deg, #fbc2eb 0%, #a6c1ee 100%); }
+            100% { background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 100%); }
+        }
+
+        /* Envelope Wrapper */
+        .envelope-wrapper {
+            position: relative;
+            cursor: pointer;
+            width: 340px;
+            height: 220px;
+            /* Adding a subtle hover effect */
+            transition: transform 0.3s ease;
+        }
+        
+        .envelope-wrapper:hover {
+            transform: translateY(-10px);
+        }
+
+        /* Envelope Back */
+        .envelope {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #fde4e1 0%, #fce1d5 100%);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transition: transform 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            transform-style: preserve-3d;
+        }
+        
+        /* Inside of the envelope visible when flap is open */
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #d8c8d3;
+            border-radius: 12px;
+        }
+
+        /* Envelope Flap */
+        .flap {
+            position: absolute;
+            width: 100%;
+            height: 110px;
+            background: linear-gradient(180deg, #ffc8c0 0%, #fde4e1 100%);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            transform-origin: top;
+            transition: transform 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            clip-path: polygon(0% 0%, 100% 0%, 100% 60%, 50% 100%, 0% 60%);
+            z-index: 10;
+        }
+
+        /* Letter Inside */
+        .letter {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transform: translateY(200px);
+            transition: transform 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55), box-shadow 0.3s, opacity 0.5s;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            transform-style: preserve-3d;
+            opacity: 0; /* Start hidden */
+        }
+
+        .letter .message, .letter .photo {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border-radius: 10px;
+        }
+
+        .letter .photo {
+            transform: rotateY(180deg);
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Animations */
+        .envelope-wrapper.open .flap {
+            transform: rotateX(180deg);
+        }
+
+        .envelope-wrapper.open .letter {
+            transform: translateY(0);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            opacity: 1; /* Become visible */
+        }
+
+        .envelope-wrapper.show-photo .letter {
+            transform: translateY(0) rotateY(180deg);
+        }
+
+        .envelope-wrapper.close .flap {
+            transform: rotateX(0deg);
+        }
+        
+        .envelope-wrapper.close .letter {
+            transform: translateY(200px);
+            opacity: 0; /* Fade out */
+        }
+
+        /* Final Message */
+        .final-message {
+            position: absolute;
+            font-size: 2.5rem;
+            color: #2c3e50;
+            opacity: 0;
+            transform: scale(0.8) translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            pointer-events: none;
+            text-align: center;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .final-message.visible {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="envelope-wrapper" id="envelope">
+        <div class="envelope">
+            <div class="letter" id="letter">
+                <div class="message">
+                    <p style="margin: 0; font-size: 1.1rem; color: #555; line-height: 1.6;">
+                        b7bk ya sisi </p>
+                </div>
+                <div class="photo" style="background-image: url('image.jpg');">
+                    </div>
+            </div>
+        </div>
+        <div class="flap"></div>
+    </div>
+
+    <div class="final-message" id="finalMessage">
+        <p>teezak mlbn</p>
+    </div>
+
+    <script>
+        const envelope = document.getElementById('envelope');
+        const finalMessage = document.getElementById('finalMessage');
+        let clickCount = 0;
+        let isClosing = false; // Flag to prevent re-opening during close animation
+
+        envelope.addEventListener('click', () => {
+            if (isClosing) return; // Ignore clicks if it's already closing
+
+            clickCount++;
+
+            if (clickCount === 1) {
+                // Open the envelope to show the message
+                envelope.classList.add('open');
+            } else if (clickCount === 2) {
+                // Flip the letter to show the photo
+                envelope.classList.add('show-photo');
+            } else if (clickCount === 3) {
+                // Start closing the envelope
+                isClosing = true;
+                envelope.classList.remove('open', 'show-photo');
+                envelope.classList.add('close');
+                
+                // Hide envelope and show final message after animation is complete
+                setTimeout(() => {
+                    envelope.style.transition = 'opacity 0.5s';
+                    envelope.style.opacity = '0';
+                    finalMessage.classList.add('visible');
+                    
+                    // Make envelope non-interactive after it's gone
+                    setTimeout(() => {
+                        envelope.style.display = 'none';
+                    }, 500);
+
+                }, 1000); // This delay should be longer than the close animation
+            }
+        });
+    </script>
+
+</body>
+</html>
